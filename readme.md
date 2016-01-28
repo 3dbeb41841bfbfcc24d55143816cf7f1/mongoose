@@ -280,6 +280,38 @@ Car.findOneAndUpdate({ make: 'Tesla' }, updates, options, function(err, updated)
 
 See `promises.js` for an example using promises instead of callbacks to control the order of execution and avoid race conditions.
 
+## LAB Exercise - MongoDB Movies Database
+
+Movies are always fun. Using the concepts and some of the code from the code-along, write a JavaScript app called `movie-app.js` that uses the `db.js` file from our code-along to populate a movies database in MongoDB. Create the file `movie.js` that defines your Mongoose `Movie` model. A movie should have the following properties:
+
+* title: String            (required)
+* genre: String            (required)
+* releaseYear: Number      (optional)
+* director: String         (optional)
+* rating: Number           (optional)
+
+Feel free to add any other fields you want.
+
+Use the `Movie` model to create some movies and save them to your database.
+Write a function that returns all of the movies of a specific genre:
+
+```javascript
+function getMoviesByGenre(genre) {
+  // TODO: Mongoose code goes here, including code to print the movies
+}
+
+Write a function to update the rating of a movie:
+
+```javascript
+function updateRating(movieId, rating) {
+  // TODO: Mongoose code goes here.
+}
+```
+
+Try calling the functions to test them out.
+
+### Bonus: Write the code using promises instead of callbacks.
+
 
 ## What are embedded documents? Codealong (20 mins)
 
