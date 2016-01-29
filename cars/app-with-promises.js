@@ -28,7 +28,7 @@ Car.remove({})
     { make: 'Tesla',   model: 'S',   color: 'black',  year:  2014 },
     { make: 'Porsche', model: '911', color: 'silver', year:  2011 }
   ];
-  return Car.create(theCars)
+  return Car.create(theCars);
 })
 .then(function(savedCars) {
   console.log('Finished creating cars:', savedCars.length);
@@ -55,7 +55,6 @@ Car.remove({})
   console.log('Updated!');
   updated.print();
   quit();
-})
-.then(null, function(err) {
+}, function(err) {
   return handleError(err);
 });
