@@ -1,6 +1,6 @@
-var mongoose = require('mongoose');
-var db = require('./db');
-var Car = require('./car');
+let mongoose = require('mongoose');
+let db = require('./db');
+let Car = require('./car');
 
 // Connect to the database
 // To connect use the following:
@@ -20,17 +20,20 @@ function quit() {
   console.log('All Done!');
 }
 
+
+var tesla = new Car({ make: 'Tesla', model: 'S', color: 'black', year: 2014 });
+tesla.print();
+
 console.log('Removing any old cars...');
 Car.remove({}, function(err) {
   if (err) return handleError(err);
-
   console.log('Creating some cars...');
   var theCars = [
     { make: 'Tesla',   model: 'S',   color: 'black',  year:  2014 },
     { make: 'Porsche', model: '911', color: 'silver', year:  2011 }
   ];
-  Car.create(theCars)
-  .then(function(savedCars) {
+  Car.create(theCars, function(err, savedCars) {
+    if (err) return handleError(err);
     console.log('Finished creating cars:', savedCars.length);
     console.log('Fetching all cars...');
     Car.find({}, function(err, fetchedCars) {
@@ -41,7 +44,7 @@ Car.remove({}, function(err) {
 
       console.log('Fetching all of the Teslas');
       Car.find({ make: 'Tesla' }, function(err, found) {
-        if (err) console.log(err);
+        if (err) return handleError(err);
         found.forEach(function(car) {
           car.print();
         });

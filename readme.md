@@ -18,13 +18,15 @@
 
 ## Using MongoDB with Node - Intro (5 mins)
 
-NodeJS and MongoDB work really well together. To handle HTTP requests and read from or send data to MongoDB, Mongoose is the most common Node.js ORM to manipulate data using MongoDB: CRUD functionality is something that is necessary in almost most every application, as we still have to create, read, update, and delete data.
+NodeJS and MongoDB work really well together. To handle HTTP requests and read from or send data to MongoDB, Mongoose is the most common Node.js ODM to manipulate data using MongoDB: CRUD functionality is something that is necessary in almost every application, as we still have to create, read, update, and delete data.
 
 For this lesson, we will build a simple `Node` app using `mongoose` and `mongodb`. We will not need `express` for this lesson.
 
 ### What Is Mongoose?
 
-Mongoose is an ODM - object document mapper - think ORM for Node. Thus mongoose gives us the ability to do CRUD operations on a MongoDB database using JavaScript objects as our model objects.
+Mongoose is an ODM - _O_bject _D_ocument _M_apper - i.e. it maps objects to documents. Therefore, Mongoose gives us the ability to do CRUD operations on a MongoDB database using JavaScript objects as our model objects.
+
+![Object Document Mapping](images/object-document-mapping.png)
 
 ## Step 1: Create the app - Codealong (5 mins)
 
@@ -39,33 +41,49 @@ npm init
 1b. Add `mongoose` to your project:
 
 ```bash
-$ npm install mongoose --save
+npm install mongoose --save
 ```
 
-1c. Edit `db.js` and add the following generic code to configure your mongoose database connection:
+1c. Create a file called `db.js`:
+
+```bash
+touch db.js
+```
+
+Add the following generic code to `db.js` to configure your mongoose database connection:
 
 ```javascript
 var mongoose = require('mongoose');
 
 var db = mongoose.connection;
 
-db.on('error', function(err) {
-  console.log('Mongoose connection error: ' + err);
-  mongoose.disconnect();
-});
-
+// CONNECTION EVENTS
 db.once('open', function() {
   console.log("Opened mongoose.");
 });
-
 db.once('close', function() {
   console.log("Closed mongoose.");
+});
+db.on('connected', function() {
+  console.log('Mongoose connected to ' + db.host + ':' + db.port + '/' + db.name);
+});
+db.on('error', function(err) {
+  console.log('Mongoose connection error: ' + err);
+});
+db.on('disconnected', function() {
+  console.log('Mongoose disconnected');
 });
 
 module.exports = db;
 ```
 
-1d. Add the following code to `app.js`:
+1d. Create a file called `app.js`:
+
+```bash
+touch app.js
+```
+
+Add the following code to `app.js`:
 
 ```javascript
 var mongoose = require('mongoose');
@@ -113,8 +131,8 @@ Now let's add the following code to `car.js`:
 var mongoose = require('mongoose');
 
 var CarSchema = new mongoose.Schema({
-  make:  { type: String, required: true, unique: true },
-  model: { type: String, required: true, unique: true },
+  make:  { type: String, required: true },
+  model: { type: String, required: true },
   year:  Number,
   color: String,
   owner: {
@@ -128,12 +146,12 @@ var CarSchema = new mongoose.Schema({
 module.exports = mongoose.model('Car', CarSchema);
 ```
 
-MongoDB is _schemaless_, meaning: all the documents in a collection can have different fields, but for the purpose of most web apps, enforcing some kind of validations via a _schema_ is often a good practice. The difference is that we are defining and enforcing the schema in our JavaScript code, not in the database itself!
+> NOTE: MongoDB is _schemaless_, meaning: all the documents in a collection can have different fields, but for the purpose of most web apps, enforcing some kind of validations via a _schema_ is often a good practice. The difference is that we are defining and enforcing the schema in our JavaScript code (via Mongoose) instead of in the database itself. Thus MongoDB does not enforce a schema, but Mongoose does!
 
-Note the following:
+Note the following about our `Car` Model:
 
-* we have created and exported a `Car` model that can be used to create `mongoose` managed `Car` model objects.
-* you can use hashes and nested attributes inside a hash.
+* We have created and exported a `Car` model that can be used to create `mongoose` managed `Car` model objects.
+* You can use hashes and nested attributes inside a hash.
 
 Here's a look at the datatypes we can use in Mongoose documents:
 
@@ -165,7 +183,7 @@ module.exports = mongoose.model('Car', CarSchema);
 Now we can call it by requiring the Car model in app.js:
 
 ```javascript
-var Car = require('./models/car');
+var Car = require('./car');
 
 var tesla = new Car({ make: 'Tesla', model: 'S', color: 'black', year: 2014 });
 tesla.print();
@@ -180,7 +198,16 @@ Now run the app with `node app.js` to see the result!
 
 We'll create a car using the `Car` method from before, along with the `save` method from _Mongoose_:
 
-Add the following to `main.js`:
+First _remove_ the following code from `app.js`:
+
+```javascript
+// wait 2 seconds and then quit
+setTimeout(function() {
+  quit();
+}, 2000);
+```
+
+Then add the following to `app.js`:
 
 ```javascript
 // a simple error handler
@@ -189,7 +216,7 @@ function handleError(err) {
   return err;
 }
 
-// save the car
+// save the car to the DB
 tesla.save(function(err) {
   if (err) return handleError(err);
   console.log('Car saved!');
@@ -197,7 +224,7 @@ tesla.save(function(err) {
 });
 ```
 
-We can create multiple cars in a single operation using the `save` method:
+> NOTE: We can also create multiple cars in a single operation using the `save` method:
 
 ```javascript
 console.log('Creating some cars...');
@@ -205,15 +232,14 @@ var theCars = [
   { make: 'Tesla',   model: 'S',   color: 'black',  year:  2014 },
   { make: 'Porsche', model: '911', color: 'silver', year:  2011 }
 ];
-Car.create(theCars)
-.then(function(savedCars) {
+Car.create(theCars, function(err, savedCars) {
   ...
 });
 ```
 
 #### What about Read?
 
-Just like ActiveRecord, we can use the JavaScript equivalent of `.all`, `.find_by_`, and `.find` to get a hold of what we're looking for.
+Just like ActiveRecord, we can use the JavaScript equivalent of `.all`, `.find_by_`, and `.find` to retrieve the data we are looking for.
 
 Inside `app.js` replace the call to `quit()` with the following:
 
@@ -228,7 +254,7 @@ Car.find({}, function(err, cars) {
 });
 ```
 
-To find only certain documents:
+> NOTE: To find only certain documents:
 
 ```javascript
 Car.find({ make: 'Tesla' }, function(err, found) {
@@ -237,7 +263,7 @@ Car.find({ make: 'Tesla' }, function(err, found) {
 });
 ```
 
-The _Mongoose_ equivalent of `.find` is `.findById`:
+> NOTE: The _Mongoose_ equivalent of Active Record's `.find` is `.findById`:
 
 ```javascript
 Car.findById(someId, function(err, user) {
@@ -248,7 +274,7 @@ Car.findById(someId, function(err, user) {
 
 ### Destroy
 
-We are getting a lot of Teslas. Each time we run `node app.js` we are inserting another Tesla, so lets clean that up.
+We are getting a lot of Teslas. Each time we run `node app.js` we are inserting another Tesla, so lets clean that up by adding the following code to `app.js`:
 
 ```javascript
 console.log('Removing any old cars...');
@@ -258,7 +284,7 @@ Car.remove({}, function(err) {
 });
 ```
 
-Mongoose gives you two convenience methods for deleting documents: `findByIdAndRemove()` and `.findOneAndRemove()`.
+> NOTE: Mongoose gives you two convenience methods for deleting documents: `findByIdAndRemove()` and `.findOneAndRemove()`.
 
 ### Update
 
