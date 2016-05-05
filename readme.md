@@ -224,6 +224,26 @@ tesla.save(function(err, saved) {
 });
 ```
 
+Run the app:
+
+```bash
+node app.js
+```
+
+    black 2014 Tesla S
+    Mongoose connected to localhost:27017/cars
+    Opened mongoose.
+    Car saved: { owner: {},
+      _id: 572b5948b107ae9f55a1a338,
+      year: 2014,
+      color: 'black',
+      model: 'S',
+      make: 'Tesla',
+      __v: 0 }
+    All Done!
+    Mongoose disconnected
+    Closed mongoose.
+
 Notice that the `saved` car has an `_id` value that was assigned to it by MongoDB!
 
 > NOTE: We can also create multiple cars in a single operation using the `save` method:
