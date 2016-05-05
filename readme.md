@@ -217,12 +217,14 @@ function handleError(err) {
 }
 
 // save the car to the DB
-tesla.save(function(err) {
+tesla.save(function(err, saved) {
   if (err) return handleError(err);
-  console.log('Car saved!');
+  console.log('Car saved:', saved);
   quit();
 });
 ```
+
+Notice that the `saved` car has an `_id` value that was assigned to it by MongoDB!
 
 > NOTE: We can also create multiple cars in a single operation using the `save` method:
 
