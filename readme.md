@@ -13,18 +13,20 @@
 *Before this lesson, students should already be able to:*
 
 - Describe how Mongo documents work
-- Describe how an ORM works
+- Describe how an ORM/ODM works
 - Create a basic NodeJS app
 
 ## Using MongoDB with Node - Intro (5 mins)
 
-NodeJS and MongoDB work really well together. To handle HTTP requests and read from or send data to MongoDB, Mongoose is the most common Node.js ODM to manipulate data using MongoDB: CRUD functionality is something that is necessary in almost every application, as we still have to create, read, update, and delete data.
+_NodeJS_ and _MongoDB_ work really well together. To handle HTTP requests and read from or send data to _MongoDB_, _Mongoose_ is the most common Node.js _ODM_ to manipulate data using _MongoDB_: _CRUD_ functionality is something that is necessary in almost every application, as we still have to _C_reate, _R_ead, _U_pdate, and _D_elete data.
 
-For this lesson, we will build a simple `Node` app using `mongoose` and `mongodb`. We will not need `express` for this lesson.
+For this lesson, we will build a simple `Node` app using `mongoose` and `mongodb`. We will *not* need `express` for this lesson.
 
 ### What Is Mongoose?
 
-Mongoose is an ODM - _O_bject _D_ocument _M_apper - i.e. it maps objects to documents. Therefore, Mongoose gives us the ability to do CRUD operations on a MongoDB database using JavaScript objects as our model objects.
+_Mongoose_ is an _ODM_ - an _O_bject _D_ocument _M_apper - i.e. it maps objects to documents. Therefore, Mongoose gives us the ability to do _CRUD_ operations on a _MongoDB_ database using JavaScript objects as our model objects.
+
+> A _model_ object is an object whose primary concern is to hold data and represent an instance of a Domain Model. For example, if we were developing an application for Delta, we might have Domain Models for Airports, Fights, Passengers, Luggage, etc.  Instances of an Airport Domain Model might be ATL, LAX, ORD, DFW, etc.
 
 ![Object Document Mapping](images/object-document-mapping.png)
 
@@ -146,7 +148,7 @@ var CarSchema = new mongoose.Schema({
 module.exports = mongoose.model('Car', CarSchema);
 ```
 
-> NOTE: MongoDB is _schemaless_, meaning: all the documents in a collection can have different fields, but for the purpose of most web apps, enforcing some kind of validations via a _schema_ is often a good practice. The difference is that we are defining and enforcing the schema in our JavaScript code (via Mongoose) instead of in the database itself. Thus MongoDB does not enforce a schema, but Mongoose does!
+> NOTE: MongoDB is _schemaless_, meaning: all the documents in a collection can have different fields, but for the purpose of most web apps, enforcing some kind of validations via a _schema_ is often a good practice. The difference is that we are defining and enforcing the schema in our JavaScript code (via Mongoose) instead of in the database itself. Thus MongoDB does not enforce a schema, ___but Mongoose does___!
 
 Note the following about our `Car` Model:
 
@@ -226,9 +228,8 @@ tesla.save(function(err, saved) {
 
 Run the app:
 
-```bash
-node app.js
 ```
+node app.js
 
     black 2014 Tesla S
     Mongoose connected to localhost:27017/cars
@@ -243,6 +244,7 @@ node app.js
     All Done!
     Mongoose disconnected
     Closed mongoose.
+```
 
 Notice that the `saved` car has an `_id` value that was assigned to it by MongoDB!
 
@@ -285,7 +287,7 @@ Car.find({ make: 'Tesla' }, function(err, found) {
 });
 ```
 
-> NOTE: The _Mongoose_ equivalent of Active Record's `.find` is `.findById`:
+You can also find a car by its ID:
 
 ```javascript
 Car.findById(someId, function(err, user) {
@@ -296,7 +298,7 @@ Car.findById(someId, function(err, user) {
 
 ### Destroy
 
-We are getting a lot of Teslas. Each time we run `node app.js` we are inserting another Tesla, so lets clean that up by adding the following code to `app.js`:
+We are getting a lot of cars. Each time we run `node app.js` we are inserting more cars, so lets clean that up by adding the following code to `app.js`:
 
 ```javascript
 console.log('Removing any old cars...');
@@ -361,132 +363,9 @@ Try calling the functions to test them out.
 ### Bonus: Write the code using promises instead of callbacks.
 
 
-## What are embedded documents? Codealong (20 mins)
+## Embedded Documents
 
-> Note: Go slowly through this section as we anticipate students having trouble
-
-Embedded documents are just what they sound like: documents with their own schemas nested in other documents. They take of the form of objects within an array.  You can think of this as a sort of `has_many` relationship - the context to use embedded documents is data entities need to be used/viewed in context of another.
-
-The nested schema are equipped with all the same features as your models: defaults, validators, middleware, and even error handling, as they are tied to the save() error callback; and Mongoose can work with embedded documents by default.
-
-
-Let's look at these two schemas below - we can embed `childSchema` into the property `children`:
-
-```javascript
-var childSchema = new Schema({ name: 'string' });
-
-var parentSchema = new Schema({
-  children: [childSchema]
-})
-
-var Parent = mongoose.model('Parent', parentSchema);
-var parent = new Parent({ children: [{ name: 'Matt' }, { name: 'Sarah' }] })
-parent.children[0].name = 'Matthew';
-parent.save(function(err) {
-  if (err) return handleError(err);
-  console.log('New Parent!');
-});
-```
-
-Or from mongoDB official docs, we can look at this example with Patron and Address models:
-
-```javascript
-{
-   _id: "joe",
-   name: "Joe Bookreader"
-}
-
-{
-   patron_id: "joe",
-   street: "123 Fake Street",
-   city: "Faketon",
-   state: "MA",
-   zip: "12345"
-}
-
-{
-   patron_id: "joe",
-   street: "1 Some Other Street",
-   city: "Boston",
-   state: "MA",
-   zip: "12345"
-}
-```
-The address documents make two references to the Joe Bookreader object, so instead we can:
-
-```javascript
-{
-   _id: "joe",
-   name: "Joe Bookreader",
-   addresses: [
-                {
-                  street: "123 Fake Street",
-                  city: "Faketon",
-                  state: "MA",
-                  zip: "12345"
-                },
-                {
-                  street: "1 Some Other Street",
-                  city: "Boston",
-                  state: "MA",
-                  zip: "12345"
-                }
-              ]
- }
- ```
-
-Note that sub-documents do not save individually, only with the highest-level document; in this case, the addresses are saved with the Joe Bookreader Patron document.
-
-#### Finding a sub-document
-
-All documents in Mongoose have an  `_id`.  Look above at our Patron example.  Joe Bookreader has an `_id` of 'joe'.
-
-> DocumentArrays have a special `id` method for looking up a document by its _id.
-
-```javascript
-// in our first example
-var doc = parent.children.id(id_you_are_looking_for);
-
-// in the second example
-var doc = patron.addresses.id(id_you_are_looking_for)
-```
-
-#### Adding and Removing sub-docs
-
-Remember Ruby methods like `pop`, `push`, or the `<<` operator?  We'll, Mongoose comes with MongooseArray methods like as `push`, `unshift`, `addToSet`, and others.  And just like adding them, we can remove them with `remove()`
-
-Using code from the official docs, we can see how these are used:
-
-```javascript
-var Parent = mongoose.model('Parent');
-var parent = new Parent;
-
-// create a child
-parent.children.push({ name: 'Liesl' });
-var subdoc = parent.children[0];
-console.log(subdoc) // { _id: '501d86090d371bab2c0341c5', name: 'Liesl' }
-subdoc.isNew; // true
-
-parent.save(function (err) {
-  if (err) return handleError(err)
-  console.log('Success!');
-});
-
-// remove
-
-var doc = parent.children.id(id_you_are_looking_for).remove();
-parent.save(function (err) {
-  if (err) return handleError(err);
-  console.log('the sub-doc was removed')
-});
-
-```
-
-Sub-docs may also be created without adding them to the array by using the create method of MongooseArrays.
-
-```javascript
-var newdoc = parent.children.create({ name: 'Aaron' });
-```
+[Embedded Documents](embedded-docs.md)
 
 ## Conclusion (5 mins)
 Mongoose is just a bridge to use MongoDB inside a NodeJS environment. There are a lot of options when creating a schema with Mongoose, we've just seen a few for the moment.
