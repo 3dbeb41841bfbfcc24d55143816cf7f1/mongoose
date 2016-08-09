@@ -328,7 +328,7 @@ Car.findOneAndUpdate({ make: 'Tesla' }, updates, options, function(err, updated)
 
 ## Avoiding Callback Hell - Promises
 
-See `promises.js` for an example using promises instead of callbacks to control the order of execution and avoid race conditions.
+See [cars/app-with-promises.js](cars/app-with-promises.js) for an example using promises instead of callbacks to control the order of execution and avoid race conditions.
 
 ## LAB Exercise - MongoDB Movies Database
 
