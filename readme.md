@@ -328,6 +328,17 @@ Car.findOneAndUpdate({ make: 'Tesla' }, updates, options, function(err, updated)
 
 ## Avoiding Callback Hell - Promises
 
+Promises are a way of avoiding the ugly syntax of _callback hell_.
+
+![Callback Hell](images/callback-hell.gif)
+
+A promise is like an _I Owe You_ some data. The `promise` is an object that we can hold on to until the promise is `resolved` (`fulfilled` or `rejected`).
+
+![Promise States](images/promise-states.png)
+
+We can use promises to get out of _callback hell_.
+Nothing fundamentally has changed, but by having a `promise` object, we can write asynchronous callback code without getting deeply nested.
+
 See [cars/app-with-promises.js](cars/app-with-promises.js) for an example using promises instead of callbacks to control the order of execution and avoid race conditions.
 
 ## LAB Exercise - MongoDB Movies Database
