@@ -1,6 +1,6 @@
-var mongoose = require('mongoose');
-var db = require('./db');
-var Car = require('./car');
+let mongoose = require('mongoose');
+let db = require('./db');
+let Car = require('./car');
 
 // Connect to the database
 // To connect use the following:
@@ -20,10 +20,13 @@ function quit() {
   console.log('All Done!');
 }
 
+
+var tesla = new Car({ make: 'Tesla', model: 'S', color: 'black', year: 2014 });
+tesla.print();
+
 console.log('Removing any old cars...');
 Car.remove({}, function(err) {
   if (err) return handleError(err);
-
   console.log('Creating some cars...');
   var theCars = [
     { make: 'Tesla',   model: 'S',   color: 'black',  year:  2014 },

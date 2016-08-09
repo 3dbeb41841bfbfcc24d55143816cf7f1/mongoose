@@ -61,7 +61,6 @@ var db = mongoose.connection;
 db.once('open', function() {
   console.log("Opened mongoose.");
 });
-
 db.once('close', function() {
   console.log("Closed mongoose.");
 });
